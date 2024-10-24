@@ -26,6 +26,8 @@
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+
 
   <!-- =======================================================
   * Template Name: MyResume
@@ -43,14 +45,27 @@
 
 </head>
 
+
+
 <body class="index-page">
 
+  
+
+
+
+
   <header id="header" class="header d-flex flex-column justify-content-center">
+  
+ 
 
     <i class="header-toggle d-xl-none bi bi-list"></i>
 
+
     <nav id="navmenu" class="navmenu">
+
+
       <ul>
+    
         <li><a href="#hero" class="active"><i class="bi bi-house navicon"></i><span>Home</span></a></li>
         <li><a href="#about"><i class="bi bi-person navicon"></i><span>About</span></a></li>
         <li><a href="#resume"><i class="bi bi-file-earmark-text navicon"></i><span>Resume</span></a></li>
@@ -62,12 +77,33 @@
 
   </header>
 
+      
+
   <main class="main">
+    
+
+    
+
+    
+  
 
     <!-- Hero Section -->
-    <section id="hero" class="hero section light-background">
-
-      <img src="assets/img/hero-bg.jpg" alt="", height=300>
+    <section id="hero">
+         
+      <div id="weather-container">
+        <h2>Live Weather Forecast</h2>
+        <input type="text" id="city" placeholder="Enter city">
+        <button onclick="getWeather()">Search</button>
+    
+        <img id="weather-icon" alt="Weather Icon">
+    
+        <div id="temp-div"></div>
+    
+        <div id="weather-info"></div>
+    
+        <div id="hourly-forecast"></div>
+    </div>
+      <img src="assets/img/hero-bg.jpg">
 
       <div class="container" data-aos="zoom-out">
         <div class="row justify-content-center">
@@ -92,7 +128,7 @@
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
         <h2>About</h2>
-        <p>“I am passionate about my work. Because I love what I do, I have a steady source of motivation that drives me to do my best. In my last job, this passion led me to challenge myself daily and learn new skills that helped me to do better work. For example, I taught myself how to use Photoshop to improve the quality of our photos and graphics. I soon became the go-to person for any design needs.” </p>
+        <p>ï¿½I am passionate about my work. Because I love what I do, I have a steady source of motivation that drives me to do my best. In my last job, this passion led me to challenge myself daily and learn new skills that helped me to do better work. For example, I taught myself how to use Photoshop to improve the quality of our photos and graphics. I soon became the go-to person for any design needs.ï¿½ </p>
       </div><!-- End Section Title -->
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -785,6 +821,107 @@
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
+  <script>
+    function getWeather() {
+const apiKey = 'b1b15e88fa797225412429c1c50c122a1';
+const city = document.getElementById('city').value;
+
+if (!city) {
+    alert('Please enter a city');
+    return;
+}
+
+const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
+const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`;
+
+fetch(currentWeatherUrl)
+    .then(response => response.json())
+    .then(data => {
+        displayWeather(data);
+    })
+    .catch(error => {
+        console.error('Error fetching current weather data:', error);
+        alert('Error fetching current weather data. Please try again.');
+    });
+
+fetch(forecastUrl)
+    .then(response => response.json())
+    .then(data => {
+        displayHourlyForecast(data.list);
+    })
+    .catch(error => {
+        console.error('Error fetching hourly forecast data:', error);
+        alert('Error fetching hourly forecast data. Please try again.');
+    });
+}
+
+function displayWeather(data) {
+const tempDivInfo = document.getElementById('temp-div');
+const weatherInfoDiv = document.getElementById('weather-info');
+const weatherIcon = document.getElementById('weather-icon');
+const hourlyForecastDiv = document.getElementById('hourly-forecast');
+
+// Clear previous content
+weatherInfoDiv.innerHTML = '';
+hourlyForecastDiv.innerHTML = '';
+tempDivInfo.innerHTML = '';
+
+if (data.cod === '404') {
+    weatherInfoDiv.innerHTML = `<p>${data.message}</p>`;
+} else {
+    const cityName = data.name;
+    const temperature = Math.round(data.main.temp - 273.15); // Convert to Celsius
+    const description = data.weather[0].description;
+    const iconCode = data.weather[0].icon;
+    const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
+
+    const temperatureHTML = `
+        <p>${temperature}Â°C</p>
+    `;
+
+    const weatherHtml = `
+        <p>${cityName}</p>
+        <p>${description}</p>
+    `;
+
+    tempDivInfo.innerHTML = temperatureHTML;
+    weatherInfoDiv.innerHTML = weatherHtml;
+    weatherIcon.src = iconUrl;
+    weatherIcon.alt = description;
+
+    showImage();
+}
+}
+
+function displayHourlyForecast(hourlyData) {
+const hourlyForecastDiv = document.getElementById('hourly-forecast');
+
+const next24Hours = hourlyData.slice(0, 8); // Display the next 24 hours (3-hour intervals)
+
+next24Hours.forEach(item => {
+    const dateTime = new Date(item.dt * 1000); // Convert timestamp to milliseconds
+    const hour = dateTime.getHours();
+    const temperature = Math.round(item.main.temp - 273.15); // Convert to Celsius
+    const iconCode = item.weather[0].icon;
+    const iconUrl = `https://openweathermap.org/img/wn/${iconCode}.png`;
+
+    const hourlyItemHtml = `
+        <div class="hourly-item">
+            <span>${hour}:00</span>
+            <img src="${iconUrl}" alt="Hourly Weather Icon">
+            <span>${temperature}Â°C</span>
+        </div>
+    `;
+
+    hourlyForecastDiv.innerHTML += hourlyItemHtml;
+});
+}
+
+function showImage() {
+const weatherIcon = document.getElementById('weather-icon');
+weatherIcon.style.display = 'block'; // Make the image visible once it's loaded
+}
+</script>
 
 </body>
 
